@@ -1,0 +1,49 @@
+.weatherRow
+{
+  display: flex;
+  flex-direction: row;
+}
+
+.weatherColumn 
+{
+  display: flex;
+  flex-direction: column;
+  margin: 0 1em;
+}
+
+#weatherIcon
+{
+  width: 16em;
+  height: 9em;
+}
+.weeklyWeatherIcon
+{
+  width: 4em;
+  height: 3em;
+}
+.weatherText
+{
+  text-align: center;
+  margin: .5em;
+}
+
+.tempBig
+{
+  font-size: 3.5em;
+  margin: 0em;
+}
+.tempHi
+{
+  color: red;
+  margin: 0em;
+}
+.tempLo
+{
+  color: blue;
+  margin: 0em;
+}
+
+.popGraphCanvas {
+  height: 16em;
+  width: 14em;
+}

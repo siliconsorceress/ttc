@@ -1,0 +1,3 @@
+[submodule "src/static/skycons"]
+	path = src/static/skycons
+	url = https://github.com/siliconsorceress/skycons.git

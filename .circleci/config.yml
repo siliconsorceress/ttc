@@ -1,0 +1,46 @@
+version: 2.1
+orbs:
+  gcp-gcr: circleci/gcp-gcr@0.0.1
+
+jobs:
+  version:
+    docker:
+      - image: circleci/python
+
+    steps:
+      - checkout
+      - run: mkdir ~/workspace
+      - run:
+          name: build version.json
+          command: |
+            ./generate-version.sh "${CIRCLE_BRANCH}" "${CIRCLE_BUILD_NUM}" "${CIRCLE_SHA1}"
+      - persist_to_workspace:
+          root: ~/workspace
+          paths:
+            - version.json
+
+  build-docker-image:
+    machine: true 
+    steps:
+      - checkout
+      - run: git submodule init
+      - run: git submodule update
+      - attach_workspace:
+          at: ~/workspace
+      - gcp-gcr/gcr-auth
+      - gcp-gcr/build-image:
+          image: ttc
+          tag: $(jq -r '.build_number' ~/workspace/version.json)
+      - gcp-gcr/push-image:
+          image: ttc
+          tag: $(jq -r '.build_number' ~/workspace/version.json)
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - version
+      - build-docker-image:
+          context: gcloud
+          requires:
+            - version

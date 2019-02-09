@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>dashboard</title>
+
+  <link rel="stylesheet" href="static/css/wall_clock.css">
+  <link rel="stylesheet" href="static/css/ttc.css">
+  <link rel="stylesheet" href="static/css/weather.css">
+  <link rel="icon" href="images/favicon.png">
+  <style>
+
+.firstTrain {
+  color: green;
+  margin-right: .5em;
+  width: 2em;
+}
+.lastTrain {
+  color: white;
+  margin-left: .5em;
+  width: 2em;
+  text-align: right;
+}
+
+.subwayContainer {
+  display:flex;
+  flex-direction: row;
+}
+
+.subwayLine {
+  height: 1em;
+  width: 1em;
+}
+
+.subwayTimeCell{
+  display:flex;
+  flex-direction: row;
+  background-image: linear-gradient(120deg, aqua 45%, blue, navy 55% );
+}
+
+.subwayTimeColumn {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  margin: .25em 1em;
+
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+</style>
+
+</head>
+
+<body>
+
+  <div id="wallClockContainer"></div>
+  <div id="busSchedulesContainer"></div>
+
+  <div class="subwayContainer">
+    <div class="subwayTimeColumn">
+      <img class="subwayLine" src="static/img/2line.svg" />
+      <div>eastbound</div>
+      <div>westbound</div>
+    </div>
+    <div class="subwayTimeColumn">
+      <div>monday-friday</div>
+      <div class="subwayTimeCell"><div class="firstTrain">5:51</div><div class="lastTrain">2:09</div></div>
+      <div class="subwayTimeCell"><div class="firstTrain">5:51</div><div class="lastTrain">1:38</div></div>
+    </div>
+
+    <div class="subwayTimeColumn">
+      <div>saturday</div>
+      <div class="subwayTimeCell"><div class="firstTrain">5:52</div><div class="lastTrain">2:09</div></div>
+      <div class="subwayTimeCell"><div class="firstTrain">5:51</div><div class="lastTrain">1:38</div></div>
+    </div>
+
+    <div class="subwayTimeColumn">
+      <div>sunday</div>
+      <div class="subwayTimeCell"><div class="firstTrain">8:12</div><div class="lastTrain">2:09</div></div>
+      <div class="subwayTimeCell"><div class="firstTrain">8:07</div><div class="lastTrain">1:38</div></div>
+    </div>
+  </div>
+  <div id="weatherContainer"></div>
+  <div id="versionContainer">Version: {{ version }}</div>
+
+  <script>var frontend_version = "{{version}}";</script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js" defer="defer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.js" defer="defer"></script>
+  <script src="static/js/wall_clock.js?version={{version}}" defer="defer"></script>
+  <script src="static/js/ttc.js?version={{version}}" defer="defer"></script>
+  <script src="static/js/weather.js?version={{version}}" defer="defer" type="module" crossorigin="true"></script>
+  <script src="static/js/version_manager.js?version={{version}}" defer="defer"></script>
+</body>
+
+</html>
