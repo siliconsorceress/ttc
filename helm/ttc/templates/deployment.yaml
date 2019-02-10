@@ -1,0 +1,94 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "ttc.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "ttc.name" . }}
+    helm.sh/chart: {{ include "ttc.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "ttc.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "ttc.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      imagePullSecrets: {{ .Values.imagePullSecrets }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "ttc.fullname" . }}
+        - name: secret-volume
+          secret:
+            secretName: "{{ required "" .Values.secrets }}"
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ required ".Values.image.repository" .Values.image.repository }}:{{ required ".Values.image.tag" .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: DARKSKY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ required "" .Values.secrets }}"
+                  key: darksky-api-key
+          ports:
+            - name: http-5000
+              containerPort: 5000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /ttc/config.json
+              name: config-volume
+              subPath: config.json
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http-5000
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http-5000
+          resources:
+{{ toYaml .Values.ttcResources | indent 12 }}
+        - name: {{ .Chart.Name }}-nginx
+          image: "{{ .Values.nginxImage.repository }}:{{ .Values.nginxImage.tag }}"
+          imagePullPolicy: {{ .Values.nginxImage.pullPolicy }}
+          ports:
+            - name: http-8080
+              containerPort: 8080
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d/nginx.conf
+              name: config-volume
+              subPath: nginx.conf
+            - mountPath: /etc/nginx/htpasswd
+              name: secret-volume
+              readOnly: true
+              subPath: htpasswd
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http-8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http-8080
+          resources:
+{{ toYaml .Values.nginxResources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

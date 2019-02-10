@@ -35,6 +35,40 @@ jobs:
           image: ttc
           tag: $(jq -r '.build_number' ~/workspace/version.json)
 
+  deploy-helm-package:
+    docker:
+      - image: circleci/python
+    steps:
+      - checkout
+
+      - run:
+          name: install helm
+          command: |
+            curl https://storage.googleapis.com/kubernetes-helm/helm-v2.11.0-linux-amd64.tar.gz > helm-v2.11.0-linux-amd64.tar.gz &&\
+            echo 02a4751586d6a80f6848b58e7f6bd6c973ffffadc52b4c06652db7def02773a1  helm-v2.11.0-linux-amd64.tar.gz | sha256sum -c &&\
+            tar -zxf helm-v2.11.0-linux-amd64.tar.gz
+
+      - run:
+          name: log in to google cloud
+          command: |
+            echo $GCLOUD_SERVICE_KEY | gcloud auth activate-service-account --key-file=-
+            gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
+            gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
+            gcloud container clusters get-credentials ${GKE_CLUSTER}
+
+      - run:
+          name: upgrade helm package
+          command: |
+            VERSION="$(jq -r '.semver' ~/workspace/version.json)"
+            sed "s/VERSION/${VERSION}/" -i helm/ttc/Chart.yaml
+
+            IMAGE_TAG="$(jq -r '.build_number' ~/workspace/version.json)"
+            BRANCH="$(jq -r '.branch' ~/workspace/version.json)"
+            ./linux-amd64/helm upgrade "ttc-${BRANCH}" ./helm/ttc -i \
+              --set image.repository=gcr.io/"${GOOGLE_PROJECT_ID}"/ttc \
+              --set image.tag=${IMAGE_TAG}" \
+              --set secrets=ttc-secrets \
+              --set imagePullSecrets='{regcred}'
 workflows:
   version: 2
   build-deploy:
@@ -44,3 +78,7 @@ workflows:
           context: gcloud
           requires:
             - version
+      - deploy-helm-package:
+          context: gcloud
+          requires:
+            - build-docker-image

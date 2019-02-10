@@ -1,0 +1,47 @@
+# Default values for ttc.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+ttcStops: ["100"]
+weatherCoordinates: "43.6706216,-79.3865296"
+
+imagePullSecrets: []
+
+image:
+  pullPolicy: IfNotPresent
+
+nginxImage:
+  repository: nginx
+  tag: stable
+  pullPolicy: IfNotPresent
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: NodePort
+  port: 8080
+
+ttcResources:
+  limits:
+    cpu: 80m
+    memory: 100Mi
+  requests:
+    cpu: 80m
+    memory: 60Mi
+
+nginxResources:
+  limits:
+    cpu: 2m
+    memory: 10Mi
+  requests:
+    cpu: 1m
+    memory: 5Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
