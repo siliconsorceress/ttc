@@ -37,7 +37,7 @@ jobs:
 
   deploy-helm-package:
     docker:
-      - image: circleci/python
+      - image: google/cloud-sdk
     steps:
       - checkout
 
